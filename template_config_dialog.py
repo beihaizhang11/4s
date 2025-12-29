@@ -100,13 +100,12 @@ class TemplateConfigDialog(QDialog):
         email_group = QGroupBox("邮件配置")
         email_layout = QVBoxLayout()
         
-        # TO列表第一个固定收件人
-        to_first_layout = QHBoxLayout()
-        to_first_layout.addWidget(QLabel("TO首位收件人:"))
-        self.to_first_edit = QLineEdit()
-        self.to_first_edit.setPlaceholderText("邮箱地址")
-        to_first_layout.addWidget(self.to_first_edit)
-        email_layout.addLayout(to_first_layout)
+        # TO列表首位收件人组
+        email_layout.addWidget(QLabel("TO首位收件人列表 (每行一个邮箱):"))
+        self.to_first_edit = QTextEdit()
+        self.to_first_edit.setMaximumHeight(80)
+        self.to_first_edit.setPlaceholderText("在最前面的固定收件人\n每行一个邮箱地址")
+        email_layout.addWidget(self.to_first_edit)
         
         # TO列表固定收件人（在动态收件人之后）
         email_layout.addWidget(QLabel("TO固定收件人列表 (每行一个邮箱):"))
@@ -160,7 +159,11 @@ class TemplateConfigDialog(QDialog):
                     self.mapping_table.setItem(i, 1, QTableWidgetItem(", ".join(cells)))
         
         # 加载邮件配置
-        self.to_first_edit.setText(self.template_config.get("email_to_first", ""))
+        to_first = self.template_config.get("email_to_first", [])
+        # 兼容旧版本配置（如果是字符串，转换为列表）
+        if isinstance(to_first, str):
+            to_first = [to_first] if to_first else []
+        self.to_first_edit.setText("\n".join(to_first))
         
         to_fixed = self.template_config.get("email_to_fixed", [])
         self.to_fixed_edit.setText("\n".join(to_fixed))
@@ -223,7 +226,8 @@ class TemplateConfigDialog(QDialog):
                         field_mappings[field_name] = cells
         
         # 获取邮件配置
-        email_to_first = self.to_first_edit.text().strip()
+        to_first_text = self.to_first_edit.toPlainText().strip()
+        email_to_first = [line.strip() for line in to_first_text.split("\n") if line.strip()]
         
         to_fixed_text = self.to_fixed_edit.toPlainText().strip()
         email_to_fixed = [line.strip() for line in to_fixed_text.split("\n") if line.strip()]

@@ -99,13 +99,15 @@ class BillGeneratorThread(QThread):
             
             # 构建收件人列表
             to_recipients = []
-            # 首位固定收件人
-            to_first = template_config.get("email_to_first", "")
-            if to_first:
-                to_recipients.append(to_first)
+            # 首位固定收件人组
+            to_first = template_config.get("email_to_first", [])
+            # 兼容旧版本配置（如果是字符串，转换为列表）
+            if isinstance(to_first, str):
+                to_first = [to_first] if to_first else []
+            to_recipients.extend(to_first)
             # 动态收件人
             to_recipients.extend(staff_emails)
-            # 固定收件人
+            # 末尾固定收件人组
             to_fixed = template_config.get("email_to_fixed", [])
             to_recipients.extend(to_fixed)
             

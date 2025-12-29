@@ -121,12 +121,16 @@ class ConfigManager:
             return template.get("field_mappings", {})
         return {}
     
-    def get_template_email_to_first(self, template_name: str) -> str:
-        """获取邮件TO列表的第一个固定收件人"""
+    def get_template_email_to_first(self, template_name: str) -> List[str]:
+        """获取邮件TO列表的首位固定收件人列表"""
         template = self.get_template(template_name)
         if template:
-            return template.get("email_to_first", "")
-        return ""
+            email_to_first = template.get("email_to_first", [])
+            # 兼容旧版本配置（如果是字符串，转换为列表）
+            if isinstance(email_to_first, str):
+                return [email_to_first] if email_to_first else []
+            return email_to_first
+        return []
     
     def get_template_email_to_fixed(self, template_name: str) -> List[str]:
         """获取邮件TO列表的固定收件人（在动态收件人之后）"""
@@ -146,7 +150,7 @@ class ConfigManager:
     def create_template_config(
         excel_template_path: str,
         field_mappings: Dict[str, List[str]],
-        email_to_first: str,
+        email_to_first: List[str],
         email_to_fixed: List[str],
         email_cc: List[str]
     ) -> Dict:
