@@ -114,12 +114,20 @@ TO: [首位固定组(可多个)] → [动态查询的staff_email] → [末尾固
 CC: [全部固定]
 ```
 
-**邮件正文格式**:
+**邮件正文模板**:
+邮件正文支持自定义模板，可在模板配置中编辑。
+
+支持的变量：
+- `{task_description}`: 任务描述
+- `{bg_description}`: 背景描述（如果为空，包含此变量的行会自动删除）
+- `{task_ids}`: 多个Task ID时显示，格式如"TASK001, TASK002"（单个Task ID时自动删除此行）
+
+默认模板：
 ```
 hello
 请参考附件服务 {task_description}
 
-背景：{bg_description} (如果bg_description为空，则不显示此行)
+背景：{bg_description}
 
 请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
 预估到货时间，并附上报价依据截图。
@@ -197,23 +205,23 @@ project/
 
 **账单文件名格式**:
 ```
-{模板名称}汽车维修服务询价：Task ID_{task_id} - {流水号}.xlsx
+Audi China汽车维修服务询价：Task ID_{task_id} - {流水号}.xlsx
 ```
 
 **示例**:
 ```
-AUDI汽车维修服务询价：Task ID_TASK001 - WST_Audi_A4_12345_张三_2025-12-29_14-30-00.xlsx
+Audi China汽车维修服务询价：Task ID_TASK001 - WST_Audi_A4_12345_张三_2025-12-29_14-30-00.xlsx
 ```
 
 ## 邮件主题格式
 
 ```
-{模板名称}汽车维修服务询价：Task ID:{task_id} - {流水号}
+Audi China汽车维修服务询价：Task ID:{task_id} - {流水号}
 ```
 
 **示例**:
 ```
-AUDI汽车维修服务询价：Task ID:TASK001 - WST_Audi_A4_12345_张三_2025-12-29_14-30-00
+Audi China汽车维修服务询价：Task ID:TASK001 - WST_Audi_A4_12345_张三_2025-12-29_14-30-00
 ```
 
 ## 注意事项
@@ -297,7 +305,14 @@ TASK001, TASK002, TASK003
    VIN111222333
    ```
 
-3. **其他字段**: 使用第一个Task ID的数据
+3. **serial_number字段**: 所有流水号用换行符连接，写入同一单元格
+   ```
+   WST_Audi_A4_12345_张三_2025-12-29_14-30-00
+   WST_Audi_A6_67890_李四_2025-12-29_15-00-00
+   WST_BMW_X5_11111_王五_2025-12-29_16-00-00
+   ```
+
+4. **其他字段**: 使用第一个Task ID的数据
    - sender_name, sender_mail, sender_phone
    - task_dept, sent_time
    - task_description, bg_description
@@ -306,20 +321,28 @@ TASK001, TASK002, TASK003
 4. **动态收件人**: 合并所有Task ID关联的staff_email（自动去重）
 
 ### 文件命名
-批量处理时，文件名使用首尾Task ID：
+文件名前缀统一为"Audi China"，批量处理时使用首尾Task ID：
 ```
-AUDI汽车维修服务询价：Task ID_TASK001~TASK003 - {流水号}.xlsx
+Audi China汽车维修服务询价：Task ID_TASK001~TASK003 - {流水号}.xlsx
 ```
 
 ### 邮件主题
+邮件主题前缀统一为"Audi China"：
 ```
-AUDI汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - {流水号}
+Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - {流水号}
 ```
 
 ### 邮件正文
 批量处理时会自动在邮件正文中标注包含的所有Task ID。
 
 ## 更新日志
+
+### v1.2.0 (2025-12-29)
+- 新增邮件正文模板功能，支持自定义邮件内容
+- 文件名和邮件主题前缀统一为"Audi China"
+- 批量处理时流水号也支持换行叠加
+- 优化用户体验，移除成功提示弹窗
+- 按钮文字更新为"生成询价单并创建邮件"
 
 ### v1.1.0 (2025-12-29)
 - 新增批量处理功能，支持多个Task ID

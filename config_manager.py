@@ -146,13 +146,21 @@ class ConfigManager:
             return template.get("email_cc", [])
         return []
     
+    def get_template_email_body_template(self, template_name: str) -> str:
+        """获取邮件正文模板"""
+        template = self.get_template(template_name)
+        if template:
+            return template.get("email_body_template", "")
+        return ""
+    
     @staticmethod
     def create_template_config(
         excel_template_path: str,
         field_mappings: Dict[str, List[str]],
         email_to_first: List[str],
         email_to_fixed: List[str],
-        email_cc: List[str]
+        email_cc: List[str],
+        email_body_template: str
     ) -> Dict:
         """创建模板配置字典"""
         return {
@@ -160,5 +168,6 @@ class ConfigManager:
             "field_mappings": field_mappings,
             "email_to_first": email_to_first,
             "email_to_fixed": email_to_fixed,
-            "email_cc": email_cc
+            "email_cc": email_cc,
+            "email_body_template": email_body_template
         }

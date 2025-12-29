@@ -139,7 +139,7 @@ class DatabaseManager:
             task_ids: task_id列表
         
         Returns:
-            合并后的数据字典，task_id和VIN字段用换行符连接，其他字段使用第一个task的数据
+            合并后的数据字典，task_id、VIN和serial_number字段用换行符连接，其他字段使用第一个task的数据
         """
         if not task_ids:
             return None
@@ -158,10 +158,6 @@ class DatabaseManager:
         # 使用第一个task的数据作为基础
         merged_data = all_task_data[0].copy()
         
-        # 生成第一个task的流水号
-        serial_number = self.generate_serial_number(all_task_data[0])
-        merged_data['serial_number'] = serial_number
-        
         # 合并task_id字段（用换行符连接）
         task_id_list = [data.get('task_id', '') for data in all_task_data]
         merged_data['task_id'] = '\n'.join(task_id_list)
@@ -169,6 +165,13 @@ class DatabaseManager:
         # 合并VIN字段（用换行符连接）
         vin_list = [data.get('VIN', '') for data in all_task_data if data.get('VIN')]
         merged_data['VIN'] = '\n'.join(vin_list)
+        
+        # 合并serial_number字段（用换行符连接）
+        serial_number_list = []
+        for data in all_task_data:
+            serial_number = self.generate_serial_number(data)
+            serial_number_list.append(serial_number)
+        merged_data['serial_number'] = '\n'.join(serial_number_list)
         
         return merged_data
     

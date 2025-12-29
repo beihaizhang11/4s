@@ -141,60 +141,51 @@ class EmailManager:
             return False
     
     @staticmethod
-    def generate_email_body(task_description: str, bg_description: str = None) -> str:
-        """生成邮件正文
+    def generate_email_body_from_template(
+        template: str, 
+        task_description: str = "", 
+        bg_description: str = None,
+        task_ids: list = None
+    ) -> str:
+        """根据模板生成邮件正文
         
         Args:
+            template: 邮件正文模板
             task_description: 任务描述
             bg_description: 背景描述（可选）
+            task_ids: Task ID列表（批量处理时使用）
         
         Returns:
             邮件正文
         """
-        body = f"""hello
-请参考附件服务 {task_description}
-"""
+        body = template
         
-        # 如果bg_description不为空，添加背景信息
+        # 替换变量
+        body = body.replace("{task_description}", task_description)
+        
+        # 处理bg_description - 如果为空，删除包含它的整行
         if bg_description and bg_description.strip():
-            body += f"""
-背景：{bg_description}
-"""
+            body = body.replace("{bg_description}", bg_description)
+        else:
+            # 删除包含{bg_description}的行
+            lines = body.split('\n')
+            filtered_lines = []
+            for line in lines:
+                if '{bg_description}' not in line:
+                    filtered_lines.append(line)
+            body = '\n'.join(filtered_lines)
         
-        body += """
-请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
-预估到货时间，并附上报价依据截图。"""
-        
-        return body
-    
-    @staticmethod
-    def generate_email_body_batch(task_ids: list, task_description: str, bg_description: str = None) -> str:
-        """生成批量处理的邮件正文
-        
-        Args:
-            task_ids: Task ID列表
-            task_description: 任务描述（使用第一个task的）
-            bg_description: 背景描述（可选）
-        
-        Returns:
-            邮件正文
-        """
-        task_ids_text = ', '.join(task_ids)
-        
-        body = f"""hello
-请参考附件服务 {task_description}
-
-本次询价包含多个Task ID: {task_ids_text}
-"""
-        
-        # 如果bg_description不为空，添加背景信息
-        if bg_description and bg_description.strip():
-            body += f"""
-背景：{bg_description}
-"""
-        
-        body += """
-请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
-预估到货时间，并附上报价依据截图。"""
+        # 处理task_ids（批量模式）
+        if task_ids and len(task_ids) > 1:
+            task_ids_text = ', '.join(task_ids)
+            body = body.replace("{task_ids}", task_ids_text)
+        else:
+            # 删除包含{task_ids}的行
+            lines = body.split('\n')
+            filtered_lines = []
+            for line in lines:
+                if '{task_ids}' not in line:
+                    filtered_lines.append(line)
+            body = '\n'.join(filtered_lines)
         
         return body

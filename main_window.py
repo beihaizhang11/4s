@@ -109,7 +109,8 @@ class BillGeneratorThread(QThread):
             else:
                 filename_task_id = task_ids[0]
             
-            output_filename = f"{self.template_name}汽车维修服务询价：Task ID_{filename_task_id} - {serial_number}.xlsx"
+            # 文件名前缀改为"Audi China"
+            output_filename = f"Audi China汽车维修服务询价：Task ID_{filename_task_id} - {serial_number}.xlsx"
             output_path = os.path.join(output_folder, output_filename)
             
             excel_manager = ExcelManager()
@@ -140,18 +141,32 @@ class BillGeneratorThread(QThread):
             # 抄送人列表
             cc_recipients = template_config.get("email_cc", [])
             
-            # 邮件主题
-            subject = f"{self.template_name}汽车维修服务询价：Task ID:{task_id_display} - {serial_number}"
+            # 邮件主题 - 前缀改为"Audi China"
+            subject = f"Audi China汽车维修服务询价：Task ID:{task_id_display} - {serial_number}"
             
-            # 邮件正文
+            # 邮件正文 - 使用模板生成
             task_description = task_data.get('task_description', '')
             bg_description = task_data.get('bg_description', '')
             
-            # 如果是批量处理，在邮件正文中添加说明
-            if is_batch:
-                body = EmailManager.generate_email_body_batch(task_ids, task_description, bg_description)
-            else:
-                body = EmailManager.generate_email_body(task_description, bg_description)
+            # 获取邮件正文模板
+            email_body_template = template_config.get("email_body_template", "")
+            if not email_body_template:
+                # 使用默认模板
+                email_body_template = """hello
+请参考附件服务 {task_description}
+
+背景：{bg_description}
+
+请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
+预估到货时间，并附上报价依据截图。"""
+            
+            # 生成邮件正文
+            body = EmailManager.generate_email_body_from_template(
+                email_body_template,
+                task_description,
+                bg_description,
+                task_ids if is_batch else None
+            )
             
             # 附件列表
             attachments = [output_path]
@@ -295,7 +310,7 @@ class MainWindow(QMainWindow):
         generate_layout.addLayout(template_select_layout)
         
         # 生成按钮
-        self.generate_btn = QPushButton("生成账单并创建邮件")
+        self.generate_btn = QPushButton("生成询价单并创建邮件")
         self.generate_btn.setStyleSheet("font-size: 14px; padding: 10px; background-color: #4CAF50; color: white;")
         self.generate_btn.clicked.connect(self.generate_bill)
         generate_layout.addWidget(self.generate_btn)
@@ -440,7 +455,7 @@ class MainWindow(QMainWindow):
         # 禁用生成按钮
         self.generate_btn.setEnabled(False)
         self.log_text.clear()
-        self.log(f"开始生成账单 - Task ID: {task_id_input}, 模板: {template_name}")
+        self.log(f"开始生成询价单 - Task ID: {task_id_input}, 模板: {template_name}")
         
         # 创建并启动生成线程
         self.generator_thread = BillGeneratorThread(task_id_input, template_name, self.config_manager)
@@ -454,7 +469,7 @@ class MainWindow(QMainWindow):
         
         if success:
             self.log("✓ " + message)
-            QMessageBox.information(self, "成功", message)
+            # 移除成功提示弹窗，只在日志中显示
         else:
             self.log("✗ " + message)
             QMessageBox.critical(self, "错误", message)

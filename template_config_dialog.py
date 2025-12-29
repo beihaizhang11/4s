@@ -124,6 +124,33 @@ class TemplateConfigDialog(QDialog):
         email_group.setLayout(email_layout)
         layout.addWidget(email_group)
         
+        # 邮件正文模板
+        body_group = QGroupBox("邮件正文模板")
+        body_layout = QVBoxLayout()
+        
+        body_help = QLabel(
+            "可用变量：{task_description}, {bg_description}, {task_ids}\n"
+            "多个Task ID时，{task_ids}会自动替换为所有Task ID"
+        )
+        body_help.setWordWrap(True)
+        body_layout.addWidget(body_help)
+        
+        self.body_template_edit = QTextEdit()
+        self.body_template_edit.setPlaceholderText(
+            "邮件正文模板，支持变量替换\n"
+            "例如：\n"
+            "hello\n"
+            "请参考附件服务 {task_description}\n"
+            "\n"
+            "背景：{bg_description}\n"
+            "\n"
+            "请2个工作日内确认是否可以提供服务。"
+        )
+        body_layout.addWidget(self.body_template_edit)
+        
+        body_group.setLayout(body_layout)
+        layout.addWidget(body_group)
+        
         # 按钮
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
@@ -170,6 +197,19 @@ class TemplateConfigDialog(QDialog):
         
         cc = self.template_config.get("email_cc", [])
         self.cc_edit.setText("\n".join(cc))
+        
+        # 加载邮件正文模板
+        body_template = self.template_config.get("email_body_template", "")
+        if not body_template:
+            # 默认模板
+            body_template = """hello
+请参考附件服务 {task_description}
+
+背景：{bg_description}
+
+请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
+预估到货时间，并附上报价依据截图。"""
+        self.body_template_edit.setText(body_template)
     
     def browse_excel_template(self):
         """浏览Excel模板文件"""
@@ -235,6 +275,12 @@ class TemplateConfigDialog(QDialog):
         cc_text = self.cc_edit.toPlainText().strip()
         email_cc = [line.strip() for line in cc_text.split("\n") if line.strip()]
         
+        # 获取邮件正文模板
+        email_body_template = self.body_template_edit.toPlainText().strip()
+        if not email_body_template:
+            QMessageBox.warning(self, "错误", "请输入邮件正文模板")
+            return
+        
         # 构建配置字典
         self.result_config = {
             "template_name": template_name,
@@ -242,7 +288,8 @@ class TemplateConfigDialog(QDialog):
             "field_mappings": field_mappings,
             "email_to_first": email_to_first,
             "email_to_fixed": email_to_fixed,
-            "email_cc": email_cc
+            "email_cc": email_cc,
+            "email_body_template": email_body_template
         }
         
         self.accept()
