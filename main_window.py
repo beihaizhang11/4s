@@ -136,8 +136,15 @@ class BillGeneratorThread(QThread):
             if isinstance(to_first, str):
                 to_first = [to_first] if to_first else []
             to_recipients.extend(to_first)
+            
             # 动态收件人
+            # 1. 添加sender_mail
+            sender_mail = task_data.get('sender_mail', '')
+            if sender_mail and sender_mail.strip():
+                to_recipients.append(sender_mail.strip())
+            # 2. 添加从tasks_staff表查询的staff_email
             to_recipients.extend(staff_emails)
+            
             # 末尾固定收件人组
             to_fixed = template_config.get("email_to_fixed", [])
             to_recipients.extend(to_fixed)
