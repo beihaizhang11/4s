@@ -166,3 +166,35 @@ class EmailManager:
 预估到货时间，并附上报价依据截图。"""
         
         return body
+    
+    @staticmethod
+    def generate_email_body_batch(task_ids: list, task_description: str, bg_description: str = None) -> str:
+        """生成批量处理的邮件正文
+        
+        Args:
+            task_ids: Task ID列表
+            task_description: 任务描述（使用第一个task的）
+            bg_description: 背景描述（可选）
+        
+        Returns:
+            邮件正文
+        """
+        task_ids_text = ', '.join(task_ids)
+        
+        body = f"""hello
+请参考附件服务 {task_description}
+
+本次询价包含多个Task ID: {task_ids_text}
+"""
+        
+        # 如果bg_description不为空，添加背景信息
+        if bg_description and bg_description.strip():
+            body += f"""
+背景：{bg_description}
+"""
+        
+        body += """
+请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
+预估到货时间，并附上报价依据截图。"""
+        
+        return body

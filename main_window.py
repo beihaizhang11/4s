@@ -30,6 +30,16 @@ class BillGeneratorThread(QThread):
     def run(self):
         """执行账单生成流程"""
         try:
+            # 解析task_id，支持多个task_id用逗号分隔
+            task_ids = [tid.strip() for tid in self.task_id.split(',') if tid.strip()]
+            if not task_ids:
+                self.finished.emit(False, "Task ID不能为空")
+                return
+            
+            is_batch = len(task_ids) > 1
+            if is_batch:
+                self.progress.emit(f"检测到批量处理模式，共 {len(task_ids)} 个Task ID")
+            
             # 1. 复制数据库到本地
             self.progress.emit("正在复制数据库到本地...")
             db_path = self.config_manager.get_database_path()
@@ -50,17 +60,27 @@ class BillGeneratorThread(QThread):
                 self.finished.emit(False, "连接数据库失败")
                 return
             
-            task_data = db_manager.prepare_data_for_excel(self.task_id)
+            # 根据是否批量处理选择不同的数据准备方法
+            if is_batch:
+                task_data = db_manager.prepare_data_for_excel_batch(task_ids)
+                staff_emails = db_manager.get_staff_emails_by_task_ids(task_ids)
+            else:
+                task_data = db_manager.prepare_data_for_excel(task_ids[0])
+                staff_emails = db_manager.get_staff_emails_by_task_id(task_ids[0])
+            
             if not task_data:
                 db_manager.disconnect()
-                self.finished.emit(False, f"未找到Task ID: {self.task_id}")
+                self.finished.emit(False, f"未找到Task ID数据")
                 return
-            
-            # 获取动态邮件收件人
-            staff_emails = db_manager.get_staff_emails_by_task_id(self.task_id)
             
             # 获取流水号
             serial_number = task_data.get('serial_number', '')
+            
+            # 生成Task ID显示文本（用于文件名和邮件主题）
+            if is_batch:
+                task_id_display = ', '.join(task_ids)
+            else:
+                task_id_display = task_ids[0]
             
             db_manager.disconnect()
             
@@ -83,7 +103,13 @@ class BillGeneratorThread(QThread):
             if not os.path.exists(output_folder):
                 os.makedirs(output_folder)
             
-            output_filename = f"{self.template_name}汽车维修服务询价：Task ID_{self.task_id} - {serial_number}.xlsx"
+            # 文件名中的Task ID部分（批量时使用第一个和最后一个）
+            if is_batch:
+                filename_task_id = f"{task_ids[0]}~{task_ids[-1]}"
+            else:
+                filename_task_id = task_ids[0]
+            
+            output_filename = f"{self.template_name}汽车维修服务询价：Task ID_{filename_task_id} - {serial_number}.xlsx"
             output_path = os.path.join(output_folder, output_filename)
             
             excel_manager = ExcelManager()
@@ -115,12 +141,17 @@ class BillGeneratorThread(QThread):
             cc_recipients = template_config.get("email_cc", [])
             
             # 邮件主题
-            subject = f"{self.template_name}汽车维修服务询价：Task ID:{self.task_id} - {serial_number}"
+            subject = f"{self.template_name}汽车维修服务询价：Task ID:{task_id_display} - {serial_number}"
             
             # 邮件正文
             task_description = task_data.get('task_description', '')
             bg_description = task_data.get('bg_description', '')
-            body = EmailManager.generate_email_body(task_description, bg_description)
+            
+            # 如果是批量处理，在邮件正文中添加说明
+            if is_batch:
+                body = EmailManager.generate_email_body_batch(task_ids, task_description, bg_description)
+            else:
+                body = EmailManager.generate_email_body(task_description, bg_description)
             
             # 附件列表
             attachments = [output_path]
@@ -252,7 +283,7 @@ class MainWindow(QMainWindow):
         task_id_layout = QHBoxLayout()
         task_id_layout.addWidget(QLabel("Task ID:"))
         self.task_id_edit = QLineEdit()
-        self.task_id_edit.setPlaceholderText("请输入Task ID")
+        self.task_id_edit.setPlaceholderText("请输入Task ID (支持多个，用逗号分隔，如: TASK001, TASK002)")
         task_id_layout.addWidget(self.task_id_edit)
         generate_layout.addLayout(task_id_layout)
         
@@ -391,8 +422,8 @@ class MainWindow(QMainWindow):
     def generate_bill(self):
         """生成账单"""
         # 验证输入
-        task_id = self.task_id_edit.text().strip()
-        if not task_id:
+        task_id_input = self.task_id_edit.text().strip()
+        if not task_id_input:
             QMessageBox.warning(self, "错误", "请输入Task ID")
             return
         
@@ -401,13 +432,18 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "错误", "请选择模板")
             return
         
+        # 解析task_id
+        task_ids = [tid.strip() for tid in task_id_input.split(',') if tid.strip()]
+        if len(task_ids) > 1:
+            self.log(f"检测到批量模式: {len(task_ids)} 个Task ID")
+        
         # 禁用生成按钮
         self.generate_btn.setEnabled(False)
         self.log_text.clear()
-        self.log(f"开始生成账单 - Task ID: {task_id}, 模板: {template_name}")
+        self.log(f"开始生成账单 - Task ID: {task_id_input}, 模板: {template_name}")
         
         # 创建并启动生成线程
-        self.generator_thread = BillGeneratorThread(task_id, template_name, self.config_manager)
+        self.generator_thread = BillGeneratorThread(task_id_input, template_name, self.config_manager)
         self.generator_thread.progress.connect(self.log)
         self.generator_thread.finished.connect(self.on_generate_finished)
         self.generator_thread.start()

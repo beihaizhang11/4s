@@ -132,6 +132,67 @@ class DatabaseManager:
         
         return task_data
     
+    def prepare_data_for_excel_batch(self, task_ids: list) -> Optional[Dict]:
+        """准备多个task_id的数据用于写入Excel
+        
+        Args:
+            task_ids: task_id列表
+        
+        Returns:
+            合并后的数据字典，task_id和VIN字段用换行符连接，其他字段使用第一个task的数据
+        """
+        if not task_ids:
+            return None
+        
+        all_task_data = []
+        for task_id in task_ids:
+            task_data = self.get_task_data(task_id)
+            if task_data:
+                all_task_data.append(task_data)
+            else:
+                print(f"警告: 未找到task_id: {task_id}")
+        
+        if not all_task_data:
+            return None
+        
+        # 使用第一个task的数据作为基础
+        merged_data = all_task_data[0].copy()
+        
+        # 生成第一个task的流水号
+        serial_number = self.generate_serial_number(all_task_data[0])
+        merged_data['serial_number'] = serial_number
+        
+        # 合并task_id字段（用换行符连接）
+        task_id_list = [data.get('task_id', '') for data in all_task_data]
+        merged_data['task_id'] = '\n'.join(task_id_list)
+        
+        # 合并VIN字段（用换行符连接）
+        vin_list = [data.get('VIN', '') for data in all_task_data if data.get('VIN')]
+        merged_data['VIN'] = '\n'.join(vin_list)
+        
+        return merged_data
+    
+    def get_staff_emails_by_task_ids(self, task_ids: list) -> List[str]:
+        """根据多个task_id从tasks_staff表获取所有相关的staff_email列表
+        
+        Args:
+            task_ids: task_id列表
+        
+        Returns:
+            去重后的staff_email列表
+        """
+        if not self.conn:
+            print("数据库未连接")
+            return []
+        
+        all_emails = set()  # 使用set去重
+        
+        for task_id in task_ids:
+            emails = self.get_staff_emails_by_task_id(task_id)
+            all_emails.update(emails)
+        
+        return list(all_emails)
+    
     def __enter__(self):
         """支持with语句"""
         return self
