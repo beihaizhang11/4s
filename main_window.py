@@ -116,7 +116,9 @@ class BillGeneratorThread(QThread):
             subject = f"{self.template_name}汽车维修服务询价：Task ID:{self.task_id} - {serial_number}"
             
             # 邮件正文
-            body = EmailManager.generate_email_body(self.task_id, serial_number, self.template_name)
+            task_description = task_data.get('task_description', '')
+            bg_description = task_data.get('bg_description', '')
+            body = EmailManager.generate_email_body(task_description, bg_description)
             
             # 附件列表
             attachments = [output_path]

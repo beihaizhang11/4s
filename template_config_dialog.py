@@ -72,7 +72,7 @@ class TemplateConfigDialog(QDialog):
         # 默认字段
         default_fields = [
             "task_id", "sender_name", "sender_mail", "sender_phone",
-            "VIN", "task_dept", "sent_time", "purpose", "serial_number"
+            "VIN", "task_dept", "sent_time", "task_description", "bg_description", "serial_number"
         ]
         self.mapping_table.setRowCount(len(default_fields))
         for i, field in enumerate(default_fields):
