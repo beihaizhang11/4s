@@ -66,7 +66,7 @@ class DatabaseManager:
             query = """
                 SELECT 
                     task_id, sender_name, sender_mail, sender_phone, 
-                    VIN, task_dept, sent_time, purpose,
+                    VIN, task_dept, sent_time, task_description, bg_description,
                     car_model, carid
                 FROM tasks
                 WHERE task_id = ?

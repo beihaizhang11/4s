@@ -78,7 +78,8 @@
 - `VIN`: 车辆识别号
 - `task_dept`: 任务部门
 - `sent_time`: 发送时间
-- `purpose`: 用途
+- `task_description`: 任务描述
+- `bg_description`: 背景描述
 - `serial_number`: 自动生成的流水号
 
 **单元格格式**:
@@ -111,6 +112,17 @@
 ```
 TO: [首位固定] → [动态查询的staff_email] → [末尾固定]
 CC: [全部固定]
+```
+
+**邮件正文格式**:
+```
+hello
+请参考附件服务 {task_description}
+
+背景：{bg_description} (如果bg_description为空，则不显示此行)
+
+请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
+预估到货时间，并附上报价依据截图。
 ```
 
 ### 生成账单流程
@@ -154,7 +166,8 @@ project/
 - `VIN`: 车辆识别号
 - `task_dept`: 任务部门
 - `sent_time`: 发送时间
-- `purpose`: 用途
+- `task_description`: 任务描述
+- `bg_description`: 背景描述
 - `car_model`: 车型
 - `carid`: 车辆ID
 

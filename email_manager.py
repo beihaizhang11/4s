@@ -141,27 +141,28 @@ class EmailManager:
             return False
     
     @staticmethod
-    def generate_email_body(task_id: str, serial_number: str, template_name: str) -> str:
+    def generate_email_body(task_description: str, bg_description: str = None) -> str:
         """生成邮件正文
         
         Args:
-            task_id: 任务ID
-            serial_number: 流水号
-            template_name: 模板名称
+            task_description: 任务描述
+            bg_description: 背景描述（可选）
         
         Returns:
             邮件正文
         """
-        body = f"""您好，
-
-附件为{template_name}汽车维修服务询价单。
-
-Task ID: {task_id}
-流水号: {serial_number}
-
-请查收，谢谢！
-
-此致
-敬礼
+        body = f"""hello
+请参考附件服务 {task_description}
 """
+        
+        # 如果bg_description不为空，添加背景信息
+        if bg_description and bg_description.strip():
+            body += f"""
+背景：{bg_description}
+"""
+        
+        body += """
+请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
+预估到货时间，并附上报价依据截图。"""
+        
         return body
