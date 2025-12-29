@@ -158,6 +158,9 @@ class DatabaseManager:
         # 使用第一个task的数据作为基础
         merged_data = all_task_data[0].copy()
         
+        # 生成第一个task的流水号（用于文件名）
+        first_serial_number = self.generate_serial_number(all_task_data[0])
+        
         # 合并task_id字段（用换行符连接）
         task_id_list = [data.get('task_id', '') for data in all_task_data]
         merged_data['task_id'] = '\n'.join(task_id_list)
@@ -166,12 +169,15 @@ class DatabaseManager:
         vin_list = [data.get('VIN', '') for data in all_task_data if data.get('VIN')]
         merged_data['VIN'] = '\n'.join(vin_list)
         
-        # 合并serial_number字段（用换行符连接）
+        # 合并serial_number字段（用换行符连接，用于Excel显示）
         serial_number_list = []
         for data in all_task_data:
             serial_number = self.generate_serial_number(data)
             serial_number_list.append(serial_number)
         merged_data['serial_number'] = '\n'.join(serial_number_list)
+        
+        # 添加一个单独的字段用于文件名（只使用第一个）
+        merged_data['serial_number_for_filename'] = first_serial_number
         
         return merged_data
     

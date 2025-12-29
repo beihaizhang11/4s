@@ -311,6 +311,8 @@ TASK001, TASK002, TASK003
    WST_Audi_A6_67890_李四_2025-12-29_15-00-00
    WST_BMW_X5_11111_王五_2025-12-29_16-00-00
    ```
+   
+   注意：文件名和邮件主题中只使用第一个Task的流水号
 
 4. **其他字段**: 使用第一个Task ID的数据
    - sender_name, sender_mail, sender_phone
@@ -321,16 +323,18 @@ TASK001, TASK002, TASK003
 4. **动态收件人**: 合并所有Task ID关联的staff_email（自动去重）
 
 ### 文件命名
-文件名前缀统一为"Audi China"，批量处理时使用首尾Task ID：
+文件名前缀统一为"Audi China"，批量处理时使用首尾Task ID和第一个Task的流水号：
 ```
-Audi China汽车维修服务询价：Task ID_TASK001~TASK003 - {流水号}.xlsx
+Audi China汽车维修服务询价：Task ID_TASK001~TASK003 - WST_..._第一个Task.xlsx
 ```
 
 ### 邮件主题
-邮件主题前缀统一为"Audi China"：
+邮件主题前缀统一为"Audi China"，批量处理时使用第一个Task的流水号：
 ```
-Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - {流水号}
+Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - WST_..._第一个Task
 ```
+
+注意：虽然Excel中的serial_number字段会显示所有流水号（换行分隔），但文件名和邮件主题中只使用第一个Task的流水号，以避免文件名过长。
 
 ### 邮件正文
 批量处理时会自动在邮件正文中标注包含的所有Task ID。

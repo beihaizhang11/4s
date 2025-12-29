@@ -74,12 +74,16 @@ class BillGeneratorThread(QThread):
                 return
             
             # 获取流水号
-            serial_number = task_data.get('serial_number', '')
-            
-            # 生成Task ID显示文本（用于文件名和邮件主题）
+            # 对于文件名和邮件主题，使用专门的字段（批量时只用第一个）
             if is_batch:
+                serial_number = task_data.get('serial_number_for_filename', '')
+                if not serial_number:
+                    # 兼容旧版本，从serial_number中提取第一行
+                    serial_number_full = task_data.get('serial_number', '')
+                    serial_number = serial_number_full.split('\n')[0] if serial_number_full else ''
                 task_id_display = ', '.join(task_ids)
             else:
+                serial_number = task_data.get('serial_number', '')
                 task_id_display = task_ids[0]
             
             db_manager.disconnect()
