@@ -107,9 +107,9 @@ class BillGeneratorThread(QThread):
             if not os.path.exists(output_folder):
                 os.makedirs(output_folder)
             
-            # 文件名中的Task ID部分（批量时使用第一个和最后一个）
+            # 文件名中的Task ID部分（批量时显示所有Task ID）
             if is_batch:
-                filename_task_id = f"{task_ids[0]}~{task_ids[-1]}"
+                filename_task_id = '_'.join(task_ids)  # 显示所有Task ID，用下划线连接
             else:
                 filename_task_id = task_ids[0]
             

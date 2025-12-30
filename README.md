@@ -320,16 +320,30 @@ TASK001, TASK002, TASK003
    VIN111222333
    ```
 
-3. **serial_number字段**: 所有流水号用换行符连接，写入同一单元格
+3. **car_model字段**: 所有车型用换行符连接，写入同一单元格
+   ```
+   Audi A4
+   Audi A6
+   BMW X5
+   ```
+
+4. **carid字段**: 所有车辆ID用换行符连接，写入同一单元格
+   ```
+   12345
+   67890
+   11111
+   ```
+
+5. **serial_number字段**: 所有流水号用换行符连接，写入同一单元格
    ```
    WST_Audi_A4_12345_Tang, Chao_2025-12-29_14-30-00
    WST_Audi_A6_67890_Zhang, Wei_2025-12-29_15-00-00
    WST_BMW_X5_11111_Wang, Lei_2025-12-29_16-00-00
    ```
    
-   注意：文件名和邮件主题中只使用第一个Task的流水号
+   注意：文件名和邮件主题中的流水号也会包含所有car_model和carid（换行显示）
 
-4. **其他字段**: 使用第一个Task ID的数据
+6. **其他字段**: 使用第一个Task ID的数据
    - sender_name, sender_mail, sender_phone
    - task_dept, sent_time
    - task_description, bg_description
@@ -341,23 +355,28 @@ TASK001, TASK002, TASK003
    - 自动去重
 
 ### 文件命名
-文件名前缀统一为"Audi China"，批量处理时使用首尾Task ID和第一个Task的流水号：
+文件名前缀统一为"Audi China"，批量处理时显示所有Task ID：
 ```
-Audi China汽车维修服务询价：Task ID_TASK001~TASK003 - WST_..._第一个Task.xlsx
+Audi China汽车维修服务询价：Task ID_TASK001_TASK002_TASK003 - WST_...xlsx
 ```
 
 ### 邮件主题
-邮件主题前缀统一为"Audi China"，批量处理时使用第一个Task的流水号：
+邮件主题前缀统一为"Audi China"，批量处理时显示所有Task ID：
 ```
-Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - WST_..._第一个Task
+Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - WST_Audi A4...
 ```
 
-注意：虽然Excel中的serial_number字段会显示所有流水号（换行分隔），但文件名和邮件主题中只使用第一个Task的流水号，以避免文件名过长。
+注意：文件名和邮件主题中的流水号也会包含所有car_model和carid（换行显示），可能导致文件名或主题较长。
 
 ### 邮件正文
 批量处理时会自动在邮件正文中标注包含的所有Task ID。
 
 ## 更新日志
+
+### v1.2.2 (2025-12-29)
+- 批量处理时文件名显示所有Task ID（不再使用~省略）
+- 批量处理时car_model和carid也显示所有值（换行分隔）
+- 流水号中包含所有car_model和carid信息
 
 ### v1.2.1 (2025-12-29)
 - 修复批量处理时的路径错误问题

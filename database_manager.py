@@ -108,10 +108,19 @@ class DatabaseManager:
         """生成流水号
         格式: WST_{car_model}_{carid}_{sender_name}_{sent_time}
         注意: sender_name保持原始格式，不替换空格和逗号
+        批量模式下，car_model和carid可能包含换行符（多个值）
         """
         try:
-            car_model = task_data.get('car_model', '').replace(' ', '_')
-            carid = task_data.get('carid', '').replace(' ', '_')
+            car_model = task_data.get('car_model', '')
+            # 如果car_model包含换行符（批量模式），保持原样
+            if '\n' not in car_model:
+                car_model = car_model.replace(' ', '_')
+            
+            carid = task_data.get('carid', '')
+            # 如果carid包含换行符（批量模式），保持原样
+            if '\n' not in carid:
+                carid = carid.replace(' ', '_')
+            
             sender_name = task_data.get('sender_name', '')  # 保持原始格式，如 "Tang, Chao"
             sent_time = task_data.get('sent_time', '').replace(' ', '_').replace(':', '-')
             
@@ -140,7 +149,7 @@ class DatabaseManager:
             task_ids: task_id列表
         
         Returns:
-            合并后的数据字典，task_id、VIN和serial_number字段用换行符连接，其他字段使用第一个task的数据
+            合并后的数据字典，task_id、VIN、car_model、carid和serial_number字段用换行符连接，其他字段使用第一个task的数据
         """
         if not task_ids:
             return None
@@ -159,9 +168,6 @@ class DatabaseManager:
         # 使用第一个task的数据作为基础
         merged_data = all_task_data[0].copy()
         
-        # 生成第一个task的流水号（用于文件名）
-        first_serial_number = self.generate_serial_number(all_task_data[0])
-        
         # 合并task_id字段（用换行符连接）
         task_id_list = [data.get('task_id', '') for data in all_task_data]
         merged_data['task_id'] = '\n'.join(task_id_list)
@@ -170,6 +176,14 @@ class DatabaseManager:
         vin_list = [data.get('VIN', '') for data in all_task_data if data.get('VIN')]
         merged_data['VIN'] = '\n'.join(vin_list)
         
+        # 合并car_model字段（用换行符连接）⭐新增
+        car_model_list = [data.get('car_model', '') for data in all_task_data if data.get('car_model')]
+        merged_data['car_model'] = '\n'.join(car_model_list)
+        
+        # 合并carid字段（用换行符连接）⭐新增
+        carid_list = [data.get('carid', '') for data in all_task_data if data.get('carid')]
+        merged_data['carid'] = '\n'.join(carid_list)
+        
         # 合并serial_number字段（用换行符连接，用于Excel显示）
         serial_number_list = []
         for data in all_task_data:
@@ -177,8 +191,8 @@ class DatabaseManager:
             serial_number_list.append(serial_number)
         merged_data['serial_number'] = '\n'.join(serial_number_list)
         
-        # 添加一个单独的字段用于文件名（只使用第一个）
-        merged_data['serial_number_for_filename'] = first_serial_number
+        # 使用包含所有car_model和carid的数据生成用于文件名的流水号
+        merged_data['serial_number_for_filename'] = self.generate_serial_number(merged_data)
         
         return merged_data
     
