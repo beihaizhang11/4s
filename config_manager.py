@@ -31,7 +31,8 @@ class ConfigManager:
         return {
             "database_path": "",  # 共享文件夹数据库路径
             "local_database_path": "./local_db.db",  # 本地数据库路径
-            "output_folder": "./output",  # 输出文件夹
+            "output_folder": "./output",  # 输出文件夹（标准版本用）
+            "pdf_directory": "",  # PDF文件目录路径（PDF版本用）
             "tutorial_attachment_path": "",  # 教程附件路径
             "templates": {}  # 模板配置
         }
@@ -66,6 +67,15 @@ class ConfigManager:
     def set_output_folder(self, path: str):
         """设置输出文件夹"""
         self.config["output_folder"] = path
+        self.save_config()
+    
+    def get_pdf_directory(self) -> str:
+        """获取PDF文件目录"""
+        return self.config.get("pdf_directory", "")
+    
+    def set_pdf_directory(self, path: str):
+        """设置PDF文件目录"""
+        self.config["pdf_directory"] = path
         self.save_config()
     
     def get_tutorial_attachment_path(self) -> str:

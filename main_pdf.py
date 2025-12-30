@@ -1,0 +1,24 @@
+"""
+主程序入口 - PDF变体版本
+"""
+import sys
+from PyQt6.QtWidgets import QApplication
+from main_window_pdf import MainWindow
+
+
+def main():
+    """主函数"""
+    app = QApplication(sys.argv)
+    
+    # 设置应用样式
+    app.setStyle('Fusion')
+    
+    # 创建并显示主窗口
+    window = MainWindow()
+    window.show()
+    
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
