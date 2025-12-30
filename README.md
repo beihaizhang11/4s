@@ -119,8 +119,8 @@ CC: [全部固定]
 邮件正文支持自定义模板，可在模板配置中编辑。
 
 支持的变量：
-- `{task_description}`: 任务描述
-- `{bg_description}`: 背景描述（如果为空，包含此变量的行会自动删除）
+- `{task_description}`: 任务描述（批量时显示所有，带序号）
+- `{bg_description}`: 背景描述（批量时显示所有，带序号；如果为空，包含此变量的行会自动删除）
 - `{task_ids}`: 多个Task ID时显示，格式如"TASK001, TASK002"（单个Task ID时自动删除此行）
 
 默认模板：
@@ -129,6 +129,21 @@ hello
 请参考附件服务 {task_description}
 
 背景：{bg_description}
+
+请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
+预估到货时间，并附上报价依据截图。
+```
+
+**批量处理时的邮件正文示例**：
+```
+hello
+请参考附件服务 [Task 1] 更换发动机机油
+[Task 2] 检查刹车系统
+[Task 3] 更换空调滤芯
+
+背景：[Task 1] 车辆行驶8000公里，需要进行常规保养
+[Task 2] 刹车有异响，需要检查
+[Task 3] 空调效果不佳
 
 请2个工作日内确认是否可以提供服务，如果可以，请补充报价信息回复询价单。
 预估到货时间，并附上报价依据截图。
@@ -351,12 +366,26 @@ TASK001, TASK002, TASK003
    WST_BMW_X5_11111_Wang, Lei_2025-12-29_16-00-00
    ```
 
-6. **文件名中的流水号**: 包含所有car_model和carid（用逗号连接，避免换行符）
+6. **task_description字段**: 所有任务描述用换行符连接，带序号标识
+   ```
+   [Task 1] 更换发动机机油
+   [Task 2] 检查刹车系统
+   [Task 3] 更换空调滤芯
+   ```
+
+7. **bg_description字段**: 所有背景描述用换行符连接，带序号标识
+   ```
+   [Task 1] 车辆行驶8000公里，需要进行常规保养
+   [Task 2] 刹车有异响，需要检查
+   [Task 3] 空调效果不佳
+   ```
+
+8. **文件名中的流水号**: 包含所有car_model和carid（用逗号连接，避免换行符）
    ```
    WST_Audi_A4,Audi_A6,BMW_X5_12345,67890,11111_Tang, Chao_2025-12-29_14-30-00
    ```
 
-7. **其他字段**: 使用第一个Task ID的数据
+9. **其他字段**: 使用第一个Task ID的数据
    - sender_name, sender_mail, sender_phone
    - task_dept, sent_time
    - task_description, bg_description
@@ -389,6 +418,7 @@ Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - WST_Aud
 ### v1.2.2 (2025-12-29)
 - 批量处理时文件名显示所有Task ID（不再使用~省略）
 - 批量处理时car_model和carid也显示所有值（Excel中换行分隔）
+- 批量处理时task_description和bg_description也显示所有值（带序号标识）
 - 流水号中包含所有car_model和carid信息
 - 修复：文件名中的流水号使用逗号连接而不是换行符（避免Windows文件名错误）
 

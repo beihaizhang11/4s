@@ -192,6 +192,24 @@ class DatabaseManager:
         carid_list = [data.get('carid', '') for data in all_task_data if data.get('carid')]
         merged_data['carid'] = '\n'.join(carid_list)
         
+        # 合并task_description字段（用换行符连接）⭐新增
+        task_description_list = []
+        for i, data in enumerate(all_task_data, 1):
+            desc = data.get('task_description', '')
+            if desc:
+                # 格式：[Task 1] 描述内容
+                task_description_list.append(f"[Task {i}] {desc}")
+        merged_data['task_description'] = '\n'.join(task_description_list) if task_description_list else ''
+        
+        # 合并bg_description字段（用换行符连接）⭐新增
+        bg_description_list = []
+        for i, data in enumerate(all_task_data, 1):
+            bg = data.get('bg_description', '')
+            if bg:
+                # 格式：[Task 1] 背景内容
+                bg_description_list.append(f"[Task {i}] {bg}")
+        merged_data['bg_description'] = '\n'.join(bg_description_list) if bg_description_list else ''
+        
         # 合并serial_number字段（用换行符连接，用于Excel显示）
         serial_number_list = []
         for data in all_task_data:
