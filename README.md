@@ -223,9 +223,14 @@ project/
 Audi China汽车维修服务询价：Task ID_{task_id} - {流水号}.xlsx
 ```
 
-**示例**:
+**单个Task ID示例**:
 ```
 Audi China汽车维修服务询价：Task ID_TASK001 - WST_Audi_A4_12345_Tang, Chao_2025-12-29_14-30-00.xlsx
+```
+
+**批量Task ID示例**:
+```
+Audi China汽车维修服务询价：Task ID_TASK001_TASK002_TASK003 - WST_Audi_A4,Audi_A6,BMW_X5_12345,67890,11111_Tang, Chao_2025-12-29_14-30-00.xlsx
 ```
 
 ## 邮件主题格式
@@ -234,9 +239,14 @@ Audi China汽车维修服务询价：Task ID_TASK001 - WST_Audi_A4_12345_Tang, C
 Audi China汽车维修服务询价：Task ID:{task_id} - {流水号}
 ```
 
-**示例**:
+**单个Task ID示例**:
 ```
 Audi China汽车维修服务询价：Task ID:TASK001 - WST_Audi_A4_12345_Tang, Chao_2025-12-29_14-30-00
+```
+
+**批量Task ID示例**:
+```
+Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - WST_Audi_A4,Audi_A6,BMW_X5_12345,67890,11111_Tang, Chao_2025-12-29_14-30-00
 ```
 
 ## 注意事项
@@ -340,10 +350,13 @@ TASK001, TASK002, TASK003
    WST_Audi_A6_67890_Zhang, Wei_2025-12-29_15-00-00
    WST_BMW_X5_11111_Wang, Lei_2025-12-29_16-00-00
    ```
-   
-   注意：文件名和邮件主题中的流水号也会包含所有car_model和carid（换行显示）
 
-6. **其他字段**: 使用第一个Task ID的数据
+6. **文件名中的流水号**: 包含所有car_model和carid（用逗号连接，避免换行符）
+   ```
+   WST_Audi_A4,Audi_A6,BMW_X5_12345,67890,11111_Tang, Chao_2025-12-29_14-30-00
+   ```
+
+7. **其他字段**: 使用第一个Task ID的数据
    - sender_name, sender_mail, sender_phone
    - task_dept, sent_time
    - task_description, bg_description
@@ -363,10 +376,10 @@ Audi China汽车维修服务询价：Task ID_TASK001_TASK002_TASK003 - WST_...xl
 ### 邮件主题
 邮件主题前缀统一为"Audi China"，批量处理时显示所有Task ID：
 ```
-Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - WST_Audi A4...
+Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - WST_Audi_A4,Audi_A6,BMW_X5_12345,67890,11111_Tang, Chao_2025-12-29_14-30-00
 ```
 
-注意：文件名和邮件主题中的流水号也会包含所有car_model和carid（换行显示），可能导致文件名或主题较长。
+注意：邮件主题中的流水号包含所有car_model和carid（用逗号连接），可能导致主题较长。
 
 ### 邮件正文
 批量处理时会自动在邮件正文中标注包含的所有Task ID。
@@ -375,8 +388,9 @@ Audi China汽车维修服务询价：Task ID:TASK001, TASK002, TASK003 - WST_Aud
 
 ### v1.2.2 (2025-12-29)
 - 批量处理时文件名显示所有Task ID（不再使用~省略）
-- 批量处理时car_model和carid也显示所有值（换行分隔）
+- 批量处理时car_model和carid也显示所有值（Excel中换行分隔）
 - 流水号中包含所有car_model和carid信息
+- 修复：文件名中的流水号使用逗号连接而不是换行符（避免Windows文件名错误）
 
 ### v1.2.1 (2025-12-29)
 - 修复批量处理时的路径错误问题

@@ -104,22 +104,30 @@ class DatabaseManager:
             print(f"查询员工邮箱失败: {e}")
             return []
     
-    def generate_serial_number(self, task_data: Dict) -> str:
+    def generate_serial_number(self, task_data: Dict, for_filename: bool = False) -> str:
         """生成流水号
         格式: WST_{car_model}_{carid}_{sender_name}_{sent_time}
+        
+        Args:
+            task_data: 任务数据
+            for_filename: 是否用于文件名（如果是，换行符会被替换为逗号）
+        
         注意: sender_name保持原始格式，不替换空格和逗号
-        批量模式下，car_model和carid可能包含换行符（多个值）
         """
         try:
             car_model = task_data.get('car_model', '')
-            # 如果car_model包含换行符（批量模式），保持原样
-            if '\n' not in car_model:
-                car_model = car_model.replace(' ', '_')
-            
             carid = task_data.get('carid', '')
-            # 如果carid包含换行符（批量模式），保持原样
-            if '\n' not in carid:
-                carid = carid.replace(' ', '_')
+            
+            # 如果用于文件名，将换行符替换为逗号
+            if for_filename:
+                car_model = car_model.replace('\n', ',').replace(' ', '_')
+                carid = carid.replace('\n', ',').replace(' ', '_')
+            else:
+                # Excel显示：只在没有换行符时替换空格
+                if '\n' not in car_model:
+                    car_model = car_model.replace(' ', '_')
+                if '\n' not in carid:
+                    carid = carid.replace(' ', '_')
             
             sender_name = task_data.get('sender_name', '')  # 保持原始格式，如 "Tang, Chao"
             sent_time = task_data.get('sent_time', '').replace(' ', '_').replace(':', '-')
@@ -136,8 +144,8 @@ class DatabaseManager:
         if not task_data:
             return None
         
-        # 生成流水号
-        serial_number = self.generate_serial_number(task_data)
+        # 生成流水号（单个Task，不需要特殊处理）
+        serial_number = self.generate_serial_number(task_data, for_filename=False)
         task_data['serial_number'] = serial_number
         
         return task_data
@@ -187,12 +195,13 @@ class DatabaseManager:
         # 合并serial_number字段（用换行符连接，用于Excel显示）
         serial_number_list = []
         for data in all_task_data:
-            serial_number = self.generate_serial_number(data)
+            serial_number = self.generate_serial_number(data, for_filename=False)
             serial_number_list.append(serial_number)
         merged_data['serial_number'] = '\n'.join(serial_number_list)
         
         # 使用包含所有car_model和carid的数据生成用于文件名的流水号
-        merged_data['serial_number_for_filename'] = self.generate_serial_number(merged_data)
+        # 注意：for_filename=True 会将换行符替换为逗号
+        merged_data['serial_number_for_filename'] = self.generate_serial_number(merged_data, for_filename=True)
         
         return merged_data
     
