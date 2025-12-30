@@ -107,11 +107,12 @@ class DatabaseManager:
     def generate_serial_number(self, task_data: Dict) -> str:
         """生成流水号
         格式: WST_{car_model}_{carid}_{sender_name}_{sent_time}
+        注意: sender_name保持原始格式，不替换空格和逗号
         """
         try:
             car_model = task_data.get('car_model', '').replace(' ', '_')
             carid = task_data.get('carid', '').replace(' ', '_')
-            sender_name = task_data.get('sender_name', '').replace(' ', '_')
+            sender_name = task_data.get('sender_name', '')  # 保持原始格式，如 "Tang, Chao"
             sent_time = task_data.get('sent_time', '').replace(' ', '_').replace(':', '-')
             
             serial_number = f"WST_{car_model}_{carid}_{sender_name}_{sent_time}"

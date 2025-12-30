@@ -194,13 +194,27 @@ project/
 
 流水号格式: `WST_{car_model}_{carid}_{sender_name}_{sent_time}`
 
-**示例**:
+**格式说明**:
+- `car_model`: 空格替换为下划线
+- `carid`: 空格替换为下划线
+- `sender_name`: 保持原始格式（不替换空格和逗号）
+- `sent_time`: 空格和冒号替换为下划线和连字符
+
+**示例1**:
 - 输入数据: 
   - car_model: "Audi A4"
   - carid: "12345"
-  - sender_name: "张三"
+  - sender_name: "Tang, Chao"
   - sent_time: "2025-12-29 14:30:00"
-- 生成流水号: `WST_Audi_A4_12345_张三_2025-12-29_14-30-00`
+- 生成流水号: `WST_Audi_A4_12345_Tang, Chao_2025-12-29_14-30-00`
+
+**示例2**:
+- 输入数据: 
+  - car_model: "BMW X5"
+  - carid: "67890"
+  - sender_name: "Zhang, Wei"
+  - sent_time: "2025-12-30 09:15:00"
+- 生成流水号: `WST_BMW_X5_67890_Zhang, Wei_2025-12-30_09-15-00`
 
 ## 生成的文件命名
 
@@ -211,7 +225,7 @@ Audi China汽车维修服务询价：Task ID_{task_id} - {流水号}.xlsx
 
 **示例**:
 ```
-Audi China汽车维修服务询价：Task ID_TASK001 - WST_Audi_A4_12345_张三_2025-12-29_14-30-00.xlsx
+Audi China汽车维修服务询价：Task ID_TASK001 - WST_Audi_A4_12345_Tang, Chao_2025-12-29_14-30-00.xlsx
 ```
 
 ## 邮件主题格式
@@ -222,7 +236,7 @@ Audi China汽车维修服务询价：Task ID:{task_id} - {流水号}
 
 **示例**:
 ```
-Audi China汽车维修服务询价：Task ID:TASK001 - WST_Audi_A4_12345_张三_2025-12-29_14-30-00
+Audi China汽车维修服务询价：Task ID:TASK001 - WST_Audi_A4_12345_Tang, Chao_2025-12-29_14-30-00
 ```
 
 ## 注意事项
@@ -308,9 +322,9 @@ TASK001, TASK002, TASK003
 
 3. **serial_number字段**: 所有流水号用换行符连接，写入同一单元格
    ```
-   WST_Audi_A4_12345_张三_2025-12-29_14-30-00
-   WST_Audi_A6_67890_李四_2025-12-29_15-00-00
-   WST_BMW_X5_11111_王五_2025-12-29_16-00-00
+   WST_Audi_A4_12345_Tang, Chao_2025-12-29_14-30-00
+   WST_Audi_A6_67890_Zhang, Wei_2025-12-29_15-00-00
+   WST_BMW_X5_11111_Wang, Lei_2025-12-29_16-00-00
    ```
    
    注意：文件名和邮件主题中只使用第一个Task的流水号
